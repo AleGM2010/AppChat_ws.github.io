@@ -1,0 +1,22 @@
+# Archivos de compilación Python
+*.pyc
+__pycache__/
+**/__pycache__/
+**/*.pyc
+
+# Bases de datos locales
+*.sqlite3
+*.db
+*.db3
+
+# Entornos virtuales (opcional)
+env/
+venv/
+
+# Archivos de configuración locales
+*.env
+
+# Migraciones de Django
+**/migrations/*.py
+**/migrations/__pycache__/
+**/migrations/*.pyc
