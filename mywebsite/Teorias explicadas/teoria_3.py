@@ -36,3 +36,15 @@ if settings.DEBUG:
 # Lo correcta seria poder levantar el sv sin problemas y ver en la 'consola' de la pagina
 # (F12) Si aparece el mensaje que pusimos en el chat.js
 
+"""
+la forma en js de eventos y escucha es:
+
+windows.onload = function(){
+    document.querySelector('#gtnMessage')
+    
+}
+
+Donde el documents , es como en Unity el 'BuscarElementoPorTag'
+
+
+"""
