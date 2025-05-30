@@ -15,9 +15,9 @@
     </div>
 </div>
 
-<script>
-    var user = '{{ request.user }}'
-</script>
+<script> var user = '{{ request.user }}'</script>
 
+<script src="{% static '/js/jquery-3.7.1.js' %}"></script>
 <script src="{% static '/js/chat.js' %}"></script>
+
 {% endblock %}

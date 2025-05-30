@@ -1,3 +1,6 @@
+
+$( function(){
+
 // Se ejecuta cuando la página termina de cargarse
 window.onload = function() {
     // Agrega un evento 'click' al botón con id "btnMessage" (el botón "Enviar")
@@ -44,3 +47,5 @@ function loadMessageHTML(m) {
         </div>
     `;
 };
+
+})
