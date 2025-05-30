@@ -64,7 +64,8 @@ ASGI_APPLICATION = 'mywebsite.asgi.application'
 
 CHANNEL_LAYERS = {
     'default': {
-        "BACKEND": 'channels.redis.core.RedisChannelLayer',  # Usamos Redis como backend
+        "BACKEND": 'channels_redis.core.RedisChannelLayer', 
+        # Usamos Redis como backend
         "CONFIG": {
             "hosts": [("localhost",6379)],  # Capacidad máxima de mensajes en cola
         },

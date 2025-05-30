@@ -9,7 +9,7 @@ from .consumers import ChatConsumer
 websocket_urlpatterns = [
     # ..'ws/chat/' es la ruta WebSocket que el cliente usará para conectarse
 
-    path('ws/room/<room_id>', ChatConsumer.as_asgi()),
+    path('ws/room/<room_id>/', ChatConsumer.as_asgi()),
     # Fijate tambien que se usa 'as_asgi()' en lugar de 'as_view()'  !!
 
     # ¿El usuario ve esta URL? No exactamente.

@@ -1,5 +1,9 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
+from asgiref.sync import async_to_sync
+
+# a las 3 funciones que tenemos en ChatConsumers asincroncas hay que incorporar
+# La sincronizidad, eso se hace con async_to_sync
 
 class ChatConsumer(WebsocketConsumer):
     """
@@ -19,6 +23,15 @@ class ChatConsumer(WebsocketConsumer):
             self.accept()  # Acepta la conexión
         """
         print('Conexión establecida')            # Log en servidor
+        # Antes el print lo usabamos para saber si el metodo paso por acá , pero realmente
+        # No habia una conexion establecida como tal
+
+        # Ahora tenemos que generar un room_name o chanel , para que 
+        # cada persona va a tener un ID especial, algo que determine que esa persona 
+        # se conecte a esa sala en particular con un hash de seguridad
+        self.id = self.scope['url_route']['kwargs']['room_id']
+        print(self.id)
+
         self.accept()                             # Aceptamos el WebSocket
 
     def disconnect(self, close_code):
