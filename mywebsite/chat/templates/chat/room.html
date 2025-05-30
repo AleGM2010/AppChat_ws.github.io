@@ -9,13 +9,16 @@
     <div id="boxMessages"></div>
 
     <div id="chat">
-        <input class="form-control" type="text" id="inputMessage">
+        <input class="form-control" type="text" id="inputMessage" placeholder="Escribe tu mensaje aquí..." autocomplete="off">
         <button class="btn btn-success mt-2" submit id="btnMessage">Enviar</button>
         <a class="btn btn-primary mt-2 float-end" href="{% url 'home' %}">Salir</a>
     </div>
 </div>
 
-<script> var user = '{{ request.user }}'</script>
+<script> 
+    var user = '{{ request.user }}'
+    var room_id = '{{ room.id }}'
+</script>
 
 <script src="{% static '/js/jquery-3.7.1.js' %}"></script>
 <script src="{% static '/js/chat.js' %}"></script>
