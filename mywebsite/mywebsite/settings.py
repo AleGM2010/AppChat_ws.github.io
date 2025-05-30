@@ -62,6 +62,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mywebsite.wsgi.application'
 ASGI_APPLICATION = 'mywebsite.asgi.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        "BACKEND": 'channels.redis.core.RedisChannelLayer',  # Usamos Redis como backend
+        "CONFIG": {
+            "hosts": [("localhost",6379)],  # Capacidad máxima de mensajes en cola
+        },
+    },
+}
+
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
