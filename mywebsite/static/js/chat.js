@@ -16,23 +16,40 @@ $( function(){
         console.log('Conexión cerrada con el WebSocket');
     }
 
-    chatSocket.onmessage = function(data) {
-        const datamsj = JSON.parse(data.data)
-        var msj = datamsj.message
-        var username = datamsj.username
-        var datetime = datamsj.datetime
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data)
 
-        document.querySelector('#boxMessages').innerHTML +=
-        `
-        <div class="alert alert-success" role="alert">
+
+        if (data.type === 'chat_message') {
+            const msj = data.message
+            const username = data.username
+            const datetime = data.datetime
+            
+            document.querySelector('#boxMessages').innerHTML +=
+            `
+            <div class="alert alert-success" role="alert">
             ${msj}
             <div>
-                <small class="fst-italic fw-bold">${username}</small>
-                <small class="float-end">${datetime}</small>
+            <small class="fst-italic fw-bold">${username}</small>
+            <small class="float-end">${datetime}</small>
             </div>
-        </div>
-        `
-    }
+            </div>
+            `
+        }
+        else if (data.type === 'user_list'){
+            let userListHTML = ''
+            let userClass = ''
+
+            for( const username of data.users){
+                if (username == user){
+                    userClass = 'list-group-item-success'
+                }
+                userListHTML += `<li class="list-group-item ${userClass}">${username}</li>`
+            }
+            document.querySelector('#userList').innerHTML = userListHTML
+        }
+
+    }    
 
     document.querySelector('#btnMessage').addEventListener('click', sendMessage)
     document.querySelector('#inputMessage').addEventListener('keypress', function(e){
@@ -65,11 +82,11 @@ $( function(){
         if(message.value.trim() !== ''){
             loadMessageHTML(message.value.trim())
             chatSocket.send(JSON.stringify({
+                type: 'chat_message',
                 message: message.value.trim(),
             }))
 
             console.log(message.value.trim())
-
             message.value = ''
         } else {
             console.log('Envió un mensaje vacío')
