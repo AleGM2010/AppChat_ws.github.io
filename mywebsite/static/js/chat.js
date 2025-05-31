@@ -16,6 +16,31 @@ $( function(){
         console.log('Conexión cerrada con el WebSocket');
     }
 
+    chatSocket.onmessage = function(data) {
+        const datamsj = JSON.parse(data.data)
+        var msj = datamsj.message
+        var username = datamsj.username
+        var datetime = datamsj.datetime
+
+        document.querySelector('#boxMessages').innerHTML +=
+        `
+        <div class="alert alert-success" role="alert">
+            ${msj}
+            <div>
+                <small class="fst-italic fw-bold">${username}</small>
+                <small class="float-end">${datetime}</small>
+            </div>
+        </div>
+        `
+    }
+
+    document.querySelector('#btnMessage').addEventListener('click', sendMessage)
+    document.querySelector('#inputMessage').addEventListener('keypress', function(e){
+        if(e.keyCode == 13){
+            sendMessage()
+        }
+    })
+
     // Se ejecuta cuando la página termina de cargarse
     window.onload = function() {
         // Agrega un evento 'click' al botón con id "btnMessage" (el botón "Enviar")
@@ -34,37 +59,46 @@ $( function(){
     };
 
     // Función para enviar un mensaje
-    function sendMessage() {
-        // Selecciona el campo de entrada con id "inputMessage" y obtiene su valor
-        var message = document.querySelector('#inputMessage');
+    function sendMessage(){
+        var message = document.querySelector('#inputMessage')
 
-        // Llama a la función loadMessageHTML con el valor del mensaje para mostrarlo en la interfaz
-        
-        // Verifica si el valor del mensaje, después de eliminar espacios, no está vacío
-        if (message.value.trim() !== '') {
-            // Si no está vacío, limpia el campo de entrada
-            loadMessageHTML(message.value.trim());
-            message.value = '';
+        if(message.value.trim() !== ''){
+            loadMessageHTML(message.value.trim())
+            chatSocket.send(JSON.stringify({
+                message: message.value.trim(),
+            }))
+
+            console.log(message.value.trim())
+
+            message.value = ''
         } else {
-            console.log('El mensaje está vacío, no se enviará');
+            console.log('Envió un mensaje vacío')
         }
-
-
-    };
+    }
 
     // Función para cargar y mostrar el mensaje en el HTML
     function loadMessageHTML(m) {
+        const dateObject = new Date();
+        const year = dateObject.getFullYear();
+        const month = String(dateObject.getMonth() + 1).padStart(2, '0'); // Meses empiezan desde 0
+        const day = String(dateObject.getDate()).padStart(2, '0');
+        const hours = String(dateObject.getHours()).padStart(2, '0');
+        const minutes = String(dateObject.getMinutes()).padStart(2, '0');
+        const seconds = String(dateObject.getSeconds()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
         // Selecciona el elemento con id "boxMessages" (donde se muestran los mensajes)
         // y agrega un nuevo HTML con el mensaje recibido
-        document.querySelector('#boxMessages').innerHTML += `
-            <div class="alert alert-primary" role="alert">
-                ${m}
-                <div>
-                    <small class="fst-italic fw-bold">${user}</small>
-                    <small class="float-end">2023-12-27 08:33</small>
-                </div>
+        document.querySelector('#boxMessages').innerHTML +=
+        `
+        <div class="alert alert-primary" role="alert">
+            ${m}
+            <div>
+                <small class="fst-italic fw-bold">${user}</small>
+                <small class="float-end">${formattedDate}</small>
             </div>
-        `;
-    };
+        </div>
+        `
+    }
 
 })
