@@ -38,12 +38,8 @@ $( function(){
         }
         else if (data.type === 'user_list'){
             let userListHTML = ''
-            let userClass = ''
-
-            for( const username of data.users){
-                if (username == user){
-                    userClass = 'list-group-item-success'
-                }
+            for(const username of data.users){
+                const userClass = (username === user) ? 'list-group-item-success' : 'list-group-item-secondary'
                 userListHTML += `<li class="list-group-item ${userClass}">${username}</li>`
             }
             document.querySelector('#userList').innerHTML = userListHTML
