@@ -5,6 +5,11 @@ from django.utils import timezone
 from .models import Message
 
 class ChatConsumer(WebsocketConsumer):
+    # Definimos un diccionario de usuarios conectados - vacio en un inicio
+    connected_users = {} # Proposito: cargar usuarios de un room cuando entran, sacarlos cuando salen
+                         # Y enviar esa lista info a la js (para que se actualice 
+                         # la lista de usuarios conectados)
+
     """
     🗂️ Clase basada en CBV para WebSockets
     Gestiona conexiones de clientes a salas de chat.
@@ -17,6 +22,15 @@ class ChatConsumer(WebsocketConsumer):
         self.id = self.scope['url_route']['kwargs']['room_id']
         self.room_group_name = f'sala_chat{self.id}'
         self.user = self.scope['user']  # Usuario conectado
+        self.username = self.user.username if self.user.is_authenticated else None
+
+        # Agregamos el usuario al dicc 
+        if self.room_group_name not in self.connected_users:
+            self.connected_users[self.room_group_name] = []
+        if self.username:
+            self.connected_users[self.room_group_name].append(self.username)
+        # El codigo anterior lo que hace es que si el room_group_name no existe
+        # en el diccionario, lo crea y añade el usuario conectado a la lista de usuarios
 
         print(f'Conectando a la sala: {self.room_group_name}')
         print(f'Canal del cliente: {self.channel_name}')
@@ -29,8 +43,24 @@ class ChatConsumer(WebsocketConsumer):
         )
 
         self.accept()
+        # Una vez aceptada la conexión, podemos enviar el diccionario de usuarios conectados
+        async_to_sync(self.channel_layer.group_send)(self.room_group_name, {
+            # Esto lo creamos anteriormente
+            'type': 'user_list',
+            'users': self.connected_users[self.room_group_name]
+        })
 
     def disconnect(self, close_code):
+        # Eliminamos el usuario del diccionario de usuarios conectados
+        if self.username in self.connected_users[self.room_group_name]:
+            self.connected_users[self.room_group_name].remove(self.username)
+
+        # Actualizamos la lista de usuarios conectados en el grupo
+        async_to_sync(self.channel_layer.group_send)(self.room_group_name, {
+            # Esto lo creamos anteriormente
+            'type': 'user_list',
+            'users': self.connected_users[self.room_group_name]
+        })
         print(f'Se ha desconectado (code={close_code})')
 
         # Quitamos el canal del grupo
@@ -39,40 +69,54 @@ class ChatConsumer(WebsocketConsumer):
             self.channel_name
         )
 
+    def user_list(self, event):
+        #Enviar la lista de usuarios conectados a todos los clientes en la sala
+        self.send(text_data=json.dumps({
+            'type': 'user_list',
+            'users': event['users']  # Lista de usuarios conectados
+        }))
+
     def receive(self, text_data):
         try:
-            print('Mensaje recibido:', text_data)
 
             text_data_json = json.loads(text_data)
-            message = text_data_json['message']
+            event_type = text_data_json.get('type')
+            if event_type == 'chat_message':
+                message = text_data_json['message']
+                # Identificamos al remitente si está autenticado
+                if self.scope['user'].is_authenticated:
+                    sender_id = self.scope['user'].id
+                else:
+                    sender_id = None
 
-            # Identificamos al remitente si está autenticado
-            sender_id = self.user.id if self.user.is_authenticated else None
+                if sender_id:
+                    # Grabamos los datos en la BD
+                    message_save = Message.objects.create(
+                        user_id=sender_id, # Recordemos que Create lo valida y crea
+                        room_id=self.id,
+                        message=message)
+                    message_save.save()  # Guardamos el mensaje en la base de datos
+                    """ Recordemos que es un CHAT y no un FORO por lo que cuando se entra al chat
+                        los mensajes no se cargan a la sala
+                    """
+                    # Sincronizamos
+                    # Enviamos el mensaje a todos en la sala (menos a sí mismo)
+                    async_to_sync(self.channel_layer.group_send)(
+                        self.room_group_name,
+                        {
+                            'type': 'chat_message',
+                            'message': message,
+                            'username': self.user.username,
+                            'datetime': timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M:%S'),
+                            'sender_id': sender_id,
+                        }
+                    )
+                else:
+                    print("Usuario no autenticado, no se envía mensaje.")
 
-            if sender_id:
-                # Grabamos los datos en la BD
-                message_save = Message.objects.create(
-                    user_id=sender_id, # Recordemos que Create lo valida y crea
-                    room_id=self.id,
-                    message=message)
-                message_save.save()  # Guardamos el mensaje en la base de datos
-                """ Recordemos que es un CHAT y no un FORO por lo que cuando se entra al chat
-                    los mensajes no se cargan a la sala
-                """
-                # Sincronizamos
-                # Enviamos el mensaje a todos en la sala (menos a sí mismo)
-                async_to_sync(self.channel_layer.group_send)(
-                    self.room_group_name,
-                    {
-                        'type': 'chat_message',
-                        'message': message,
-                        'username': self.user.username,
-                        'datetime': timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M:%S'),
-                        'sender_id': sender_id,
-                    }
-                )
-            else:
-                print("Usuario no autenticado, no se envía mensaje.")
+            elif event_type == 'user_list':
+                # Este evento lo manejamos de Javascript desde el lado del ciente
+                pass
 
         except json.JSONDecodeError as e:
             print('Error al decodificar JSON:', e)
@@ -94,6 +138,7 @@ class ChatConsumer(WebsocketConsumer):
 
         if sender_id != current_user_id:
             self.send(text_data=json.dumps({
+                'type': 'chat_message',
                 'message': message,
                 'username': username,
                 'datetime': datetime,
