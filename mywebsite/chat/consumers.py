@@ -2,7 +2,7 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from django.utils import timezone
-
+from .models import Message
 
 class ChatConsumer(WebsocketConsumer):
     """
@@ -50,6 +50,16 @@ class ChatConsumer(WebsocketConsumer):
             sender_id = self.user.id if self.user.is_authenticated else None
 
             if sender_id:
+                # Grabamos los datos en la BD
+                message_save = Message.objects.create(
+                    user_id=sender_id, # Recordemos que Create lo valida y crea
+                    room_id=self.id,
+                    message=message)
+                message_save.save()  # Guardamos el mensaje en la base de datos
+                """ Recordemos que es un CHAT y no un FORO por lo que cuando se entra al chat
+                    los mensajes no se cargan a la sala
+                """
+                # Sincronizamos
                 # Enviamos el mensaje a todos en la sala (menos a sí mismo)
                 async_to_sync(self.channel_layer.group_send)(
                     self.room_group_name,
