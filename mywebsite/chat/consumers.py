@@ -100,7 +100,7 @@ class ChatConsumer(WebsocketConsumer):
                         los mensajes no se cargan a la sala
                     """
                     # Sincronizamos
-                    # Enviamos el mensaje a todos en la sala (menos a sí mismo)
+                    # Enviamos el mensaje a todos en la sala 
                     async_to_sync(self.channel_layer.group_send)(
                         self.room_group_name,
                         {

@@ -28,14 +28,15 @@ $( function(){
             document.querySelector('#boxMessages').innerHTML +=
             `
             <div class="alert alert-success" role="alert">
-            ${msj}
-            <div>
-            <small class="fst-italic fw-bold">${username}</small>
-            <small class="float-end">${datetime}</small>
-            </div>
+                ${msj}
+                <div>
+                    <small class="fst-italic fw-bold">${username}</small>
+                    <small class="float-end">${datetime}</small>
+                </div>
             </div>
             `
         }
+        
         else if (data.type === 'user_list'){
             let userListHTML = ''
             for(const username of data.users){
