@@ -4,6 +4,8 @@ from asgiref.sync import async_to_sync
 from django.utils import timezone
 from .models import Message
 
+#region ChatConsumer 
+
 class ChatConsumer(WebsocketConsumer):
     # Definimos un diccionario de usuarios conectados - vacio en un inicio
     connected_users = {} # Proposito: cargar usuarios de un room cuando entran, sacarlos cuando salen
@@ -147,6 +149,7 @@ class ChatConsumer(WebsocketConsumer):
             print('El mensaje no se reenvía a su emisor')
 
 
+#endregion 
 
 # a las 3 funciones que tenemos en ChatConsumers asincroncas hay que incorporar
 # La sincronizidad, eso se hace con async_to_sync
@@ -282,4 +285,3 @@ class ChatConsumer2(WebsocketConsumer):
                 'datetime': datetime
             }))
 
-    

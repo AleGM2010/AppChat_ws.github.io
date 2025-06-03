@@ -56,6 +56,7 @@ disconnect() → cuando se desconecta.
 
 # Tambien el routing 
 import chat.routing
+import juego.routing
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mywebsite.settings')
@@ -63,7 +64,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mywebsite.settings')
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
-        URLRouter(chat.routing.websocket_urlpatterns)
+        URLRouter(chat.routing.websocket_urlpatterns + juego.routing.websocket_urlpatterns)
     ),
 })
 
