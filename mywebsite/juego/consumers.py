@@ -7,12 +7,15 @@ from asgiref.sync import sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
 
 COLORS = [
-    "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#00ffff", "#ff00ff"
+    "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#00ffff", "#ff00ff",
+     "#b25757", "#4bc54b", "#4b4bb0", "#c6c645", "#43aaaa", "#871487",
+      "#6c1e1e", "#346234", "#2a2a40", "#4b4b0a", "#174c4c", "#614661",
 ]
 
 def random_color():
     cl = random.choice(COLORS)
     print("El color es: "+cl)
+    # Elegirlo y guardarlo en una base de datos con un
     return cl
 
 # Diccionario para almacenar los colores asignados a cada jugador
@@ -118,10 +121,9 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             # Intentar obtener el jugador desde la base de datos
             player = await sync_to_async(Player.objects.get)(player_id=event['playerId'])
             player_color = player.color
-            print(f"en broadcast el color es: {player_color} ")
+            
         except ObjectDoesNotExist:
             # Si el jugador no existe, manejar el error
-            print(f"⚠️ El jugador con ID {event['playerId']} no existe en la base de datos.")
             return  # Ignorar este mensaje
 
         # Enviar a todos (Unity deberá ignorar su propio ID)

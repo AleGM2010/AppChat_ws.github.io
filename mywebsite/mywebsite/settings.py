@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-0^=*@!0wb9c(#xaw#3q(#n)szg0liiw1_-@^tmw31a*&m!t3a&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.vercel.app','localhost','127.0.0.1']
 
 
 # Application definition
@@ -34,6 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Middleware for serving static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,8 +61,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'mywebsite.wsgi.application'
-ASGI_APPLICATION = 'mywebsite.asgi.application'
+WSGI_APPLICATION = 'mywebsite.wsgi.app'
+ASGI_APPLICATION = 'mywebsite.asgi.app'
 
 CHANNEL_LAYERS = {
     'default': {
@@ -118,9 +119,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
+# La carpeta que contendra los archivos estaticos
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 STATICFILES_DIRS = [
     BASE_DIR, 'static',
 ]
